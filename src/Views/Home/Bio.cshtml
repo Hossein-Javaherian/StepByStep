@@ -1,0 +1,30 @@
+﻿@model StepByStep.Models.Bio
+@{
+    ViewBag.Title = "Bio";
+}
+<h2>@ViewBag.Title</h2>
+
+<div class=" alert alert-info">
+    <p>@ViewBag.Bio</p>
+    <p>@ViewBag.Old</p>
+    <p>@ViewBag.Contact</p>
+</div>
+
+@using (Html.BeginForm("Bio", "Home", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal form" }))
+{
+    @Html.AntiForgeryToken();
+
+    @Html.TextBoxFor(m => m.Name, new { @placeholder = "Name" });
+    @Html.ValidationMessageFor(m => m.Name);
+
+
+    @Html.TextBoxFor(m => m.Family, new { @placeholder = "Family" });
+    @Html.ValidationMessageFor(m => m.Family);
+
+    <input type="submit" value="next" class="btn btn-default" />
+
+}
+@section scripts{
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+}

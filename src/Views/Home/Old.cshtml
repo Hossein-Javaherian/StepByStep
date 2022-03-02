@@ -1,0 +1,29 @@
+﻿@model StepByStep.Models.Old
+@{
+    ViewBag.Title = "Old";
+}
+<h2>@ViewBag.Title</h2>
+
+<div class=" alert alert-info">
+    <p>@ViewBag.Bio</p>
+    <p>@ViewBag.Old</p>
+    <p>@ViewBag.Contact</p>
+</div>
+
+@using (Html.BeginForm("Old", "Home", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal form" }))
+{
+    @Html.AntiForgeryToken();
+
+    @Html.TextBoxFor(m => m.Age, new { @placeholder = "Age" });
+    @Html.ValidationMessageFor(m => m.Age);
+
+    <input type="submit" name="next" value="Next" class="btn btn-default" />
+    <input type="submit" name="prev" value="Save & Prev" class="btn btn-default" />
+
+    @Html.ActionLink("Prev", "Bio", null, new { @class = "btn btn-danger" });
+
+}
+@section scripts{
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+}
