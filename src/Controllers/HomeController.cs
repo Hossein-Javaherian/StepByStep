@@ -7,7 +7,13 @@ namespace StepByStep.Controllers
 {
     public class HomeController : Controller
     {
+        #region Fields
+
         private SessionManager sessionManager;
+
+        #endregion
+
+        #region Utilities
 
         protected override void Initialize(RequestContext requestContext)
         {
@@ -16,81 +22,13 @@ namespace StepByStep.Controllers
             sessionManager = new SessionManager(Session);
         }
 
+        #endregion
+
+        #region Actions
+
         public ActionResult Index()
         {
             return View();
-        }
-
-        public ActionResult Bio()
-        {
-            var bio = sessionManager.Get<Bio>();
-            var model = new Bio
-            {
-                Name = bio.Name,
-                Family = bio.Family
-            };
-
-            ViewBag.Bio = Session.Serialize<Bio>();
-            ViewBag.Old = Session.Serialize<Old>();
-            ViewBag.Contact = Session.Serialize<Contact>();
-
-            return View(model);
-        }
-
-        [HttpPost]
-        public ActionResult Bio(Bio model)
-        {
-            if (ModelState.IsValid)
-            {
-                var bio = sessionManager.Get<Bio>();
-                bio.Name = model.Name;
-                bio.Family = model.Family;
-
-                return RedirectToAction("Old");
-            }
-
-            return View(model);
-        }
-
-        public ActionResult Old()
-        {
-            var old = sessionManager.Get<Old>();
-            var model = new Old
-            {
-                Age = old.Age
-            };
-
-            ViewBag.Old = Session.Serialize<Old>();
-
-            return View(model);
-        }
-
-        [HttpPost]
-        public ActionResult Old(Old model, string prev, string next)
-        {
-            var old = sessionManager.Get<Old>();
-
-            if (prev != null)
-            {
-                if (ModelState.IsValid)
-                {
-                    old.Age = model.Age;
-
-                    return RedirectToAction("Bio");
-                }
-            }
-
-            if (next != null)
-            {
-                if (ModelState.IsValid)
-                {
-                    old.Age = model.Age;
-
-                    return RedirectToAction("Contact");
-                }
-            }
-
-            return View(model);
         }
 
         public ActionResult About()
@@ -102,48 +40,110 @@ namespace StepByStep.Controllers
 
         public ActionResult Success()
         {
-            ViewBag.Message = "Success add ali.";
+            ViewBag.Message = "Success add entity.";
 
             return View();
         }
 
-        public ActionResult Contact()
-        {
-            var bio = sessionManager.Get<Bio>();
-            if (string.IsNullOrEmpty(bio.Name) || string.IsNullOrEmpty(bio.Family))
-                return RedirectToAction("Bio");
+        #region Step-Bio (1)
 
-            var contact = sessionManager.Get<Contact>();
-            var model = new Contact
-            {
-                Phone = contact.Phone,
-                Fax = contact.Fax
-            };
+        public ActionResult Bio()
+        {
+            var bio = sessionManager.Get<Bio>(null);
 
             ViewBag.Bio = Session.Serialize<Bio>();
-            ViewBag.Contact = Session.Serialize<Contact>();
             ViewBag.Old = Session.Serialize<Old>();
+            ViewBag.Contact = Session.Serialize<Contact>();
+
+            return View(bio);
+        }
+
+        [HttpPost]
+        public ActionResult Bio(Bio model)
+        {
+            if (ModelState.IsValid)
+            {
+                var bio = sessionManager.Get(model);
+                return RedirectToAction(nameof(Old));
+            }
 
             return View(model);
         }
 
-        [HttpPost]
-        public ActionResult Contact(Contact model, string prev)
+        #endregion
+
+        #region Step-Old (2)
+
+        public ActionResult Old()
         {
-            var old = sessionManager.Get<Old>();
-            var bio = sessionManager.Get<Bio>();
-            var contact = sessionManager.Get<Contact>();
+            var old = sessionManager.Get<Old>(null);
+
+            ViewBag.Old = Session.Serialize<Old>();
+            ViewBag.Bio = Session.Serialize<Bio>();
+            ViewBag.Contact = Session.Serialize<Contact>();
+
+            return View(old);
+        }
+
+        [HttpPost]
+        public ActionResult Old(Old model, string prev, string next)
+        {
+            var old = sessionManager.Get(model);
 
             if (prev != null)
             {
                 if (ModelState.IsValid)
                 {
-                    contact.Phone = model.Phone;
-                    contact.Fax = model.Fax;
+                    return RedirectToAction(nameof(Bio));
+                }
+            }
 
+            if (next != null)
+            {
+                if (ModelState.IsValid)
+                {
+                    old.Age = model.Age;
+
+                    return RedirectToAction(nameof(Contact));
+                }
+            }
+
+            return View(model);
+        }
+
+        #endregion
+
+        #region Step-Contact (3)
+
+        public ActionResult Contact()
+        {
+            var bio = sessionManager.Get<Bio>(null);
+            if (string.IsNullOrEmpty(bio.Name) || string.IsNullOrEmpty(bio.Family))
+                return RedirectToAction(nameof(Bio));
+
+            var contact = sessionManager.Get<Contact>(null);
+
+            ViewBag.Bio = Session.Serialize<Bio>();
+            ViewBag.Contact = Session.Serialize<Contact>();
+            ViewBag.Old = Session.Serialize<Old>();
+
+            return View(contact);
+        }
+
+        [HttpPost]
+        public ActionResult Contact(Contact model, string prev)
+        {
+            var old = sessionManager.Get<Old>(null);
+            var bio = sessionManager.Get<Bio>(null);
+            var contact = sessionManager.Get<Contact>(model);
+
+            if (prev != null)
+            {
+                if (ModelState.IsValid)
+                {
                     //Update(contact);
 
-                    return RedirectToAction("Old");
+                    return RedirectToAction(nameof(Old));
                 }
 
                 return View(model);
@@ -170,10 +170,14 @@ namespace StepByStep.Controllers
                 sessionManager.Remove<Bio>();
                 sessionManager.Remove<Contact>();
 
-                return RedirectToAction("Success");
+                return RedirectToAction(nameof(Success));
             }
 
             return View(model);
         }
+
+        #endregion
+
+        #endregion
     }
 }
