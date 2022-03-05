@@ -135,7 +135,7 @@ namespace StepByStep.Controllers
         {
             var old = sessionManager.Get<Old>(null);
             var bio = sessionManager.Get<Bio>(null);
-            var contact = sessionManager.Get<Contact>(model);
+            var contact = sessionManager.Get(model);
 
             if (prev != null)
             {
@@ -168,6 +168,7 @@ namespace StepByStep.Controllers
 
                 // Clear session
                 sessionManager.Remove<Bio>();
+                sessionManager.Remove<Old>();
                 sessionManager.Remove<Contact>();
 
                 return RedirectToAction(nameof(Success));
